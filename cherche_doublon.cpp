@@ -5,6 +5,8 @@
 #include <vector>
 #include <iomanip>
 #include <cstring>
+#include <unordered_map>
+#include <algorithm>
 
 #include <curl/curl.h>
 #include <openssl/evp.h>
@@ -80,6 +82,84 @@ std::string crc32_of_file(const std::string& path) {
   return oss.str();
 }
 
+void sort_file(std::string input, std::string output) {
+  std::ifstream infile(input);
+  if (!infile) {
+    std::cerr << "Erreur : impossible d'ouvrir le fichier " << input << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::vector<std::string> lines;
+  std::string line;
+
+  // Lire les lignes du fichier
+  while (std::getline(infile, line)) {
+    lines.push_back(line);
+  }
+  infile.close();
+
+  // Trier les lignes par ordre alphabétique
+  std::sort(lines.begin(), lines.end());
+
+  // Écrire dans un fichier de sortie
+  std::ofstream outfile(output);
+  if (!outfile) {
+    std::cerr << "Erreur : impossible d'ouvrir le fichier " << output << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  for (const auto& l : lines) {
+    outfile << l << "\n";
+  }
+  outfile.close();
+}
+
+std::vector<std::pair<int, int>> group(std::string gamelist) {
+  std::ifstream infile(gamelist);
+  if (!infile) {
+    std::cerr << "Erreur : impossible d'ouvrir le fichier " << gamelist << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::unordered_map<int, int> compteur;
+  std::string ligne;
+
+  // Lecture ligne par ligne
+  while (std::getline(infile, ligne)) {
+    std::stringstream ss(ligne);
+
+    int numero;
+
+    // On lit seulement le premier entier de la ligne
+    if (ss >> numero) {
+      compteur[numero]++;  
+    }
+    // Le reste de la ligne (nom de fichier avec espaces) est ignoré volontairement
+  }
+  infile.close();
+
+  // Conversion en tableau à deux colonnes
+  std::vector<std::pair<int, int>> tableau;
+  tableau.reserve(compteur.size());
+
+  for (const auto& entry : compteur) {
+    tableau.emplace_back(entry.first, entry.second);
+  }
+
+  return tableau;
+}
+
+int getNbOccurrences(const std::vector<std::pair<int, int>>& tableau, int valeur) {
+  for (const auto& p : tableau) {
+    if (p.first == valeur) {
+      return p.second;   // nombre d'occurrences trouvé
+    }
+  }
+  return 0;  // valeur non trouvée
+}
+
+
+
 int main(int argc, char* argv[]) {
   if (argc < 6) {
     std::cerr << "Usage:\n"
@@ -98,18 +178,18 @@ int main(int argc, char* argv[]) {
 
   std::string dir = argv[5];
 
-  std::ofstream gamelist("gamelist.dat", std::ios::app); // ouvre le fichier en mode ajout
+  std::ofstream gamelist("gamelist.dat", std::ios::trunc); // ouvre le fichier en mode ajout
   if (!gamelist) {
     std::cerr << "Impossible d'ouvrir gamelist.dat pour écriture" << std::endl;
     return 1;
   }
 
   for (const auto& entry : fs::directory_iterator(dir)) {
-    if (entry.is_regular_file() && entry.path().extension() == ".gba"){
+    if (entry.is_regular_file() && (entry.path().extension() == ".gba" || entry.path().extension() == ".zip")){
       //std::cout << "Fichier trouvé : " << entry.path().filename() << std::endl;
 
     
-      std::string file = entry.path().filename();
+      std::string file = dir+std::string("/")+entry.path().filename().string();
       std::string crchex = crc32_of_file(file);
       std::string md5hex = md5_of_file(file);
 
@@ -174,22 +254,57 @@ int main(int argc, char* argv[]) {
       if (enc_crc) curl_free(enc_crc);
       curl_easy_cleanup(curl);
 
-      tinyxml2::XMLDocument doc;
-      doc.Parse(response.c_str());
-      tinyxml2::XMLElement* data = doc.RootElement();
-      tinyxml2::XMLElement* jeu  = data->FirstChildElement("jeu");
-      std::string jeuId = jeu->Attribute("id");
+      if(http_code == 200){
+	tinyxml2::XMLDocument doc;
+	doc.Parse(response.c_str());
+	tinyxml2::XMLElement* data = doc.RootElement();
+	tinyxml2::XMLElement* jeu  = data->FirstChildElement("jeu");
+	std::string jeuId = jeu->Attribute("id");
 
-      //std::cout << jeuId << " - " << file << std::endl;
-
-      gamelist << jeuId << " - " << entry.path().filename() << std::endl;
-
-      /*if (fs::exists(dir+"/"+jeu->Attribute("id")) && fs::is_directory(dir+"/"+jeu->Attribute("id")))
-	fs::rename(file, dir+"/"+jeu->Attribute("id")+"/"+file);    
-      else
-      std::cout << "Le répertoire n'existe pas" << std::endl;*/
+	gamelist << jeuId << " " << entry.path().filename().string() << std::endl;
+      }else
+	gamelist << "-1" << " " << entry.path().filename().string() << std::endl;
+      
     }
+    
   }
+
+  std::vector<std::pair<int, int>> tableau = group("gamelist.dat");
+
+  std::ifstream infile("gamelist.dat");
+  if (!infile) {
+    std::cerr << "Erreur : impossible d'ouvrir input.txt\n";
+    exit(EXIT_FAILURE);
+  }
+
+  std::string ligne;
+
+  while (std::getline(infile, ligne)) {
+    std::stringstream ss(ligne);
+
+    int numero;
+    std::string nomFichier;
+
+    // On lit seulement le premier entier de la ligne
+    ss >> numero;
+    std::getline(ss, nomFichier);
+
+    if (!nomFichier.empty() && nomFichier[0] == ' ')
+      nomFichier.erase(0, 1);
+
+    // std::cout << numero << " - " << nomFichier << std::endl;
+
+    if(getNbOccurrences(tableau, numero) > 1 || numero < 0){
+      //std::cout << "Doublon pour " << nomFichier << std::endl;
+      std::filesystem::path repPath(dir+"/"+std::to_string(numero));
+      if (!std::filesystem::exists(repPath))
+	std::filesystem::create_directories(repPath);
+      fs::rename(dir+"/"+nomFichier, dir+"/"+std::to_string(numero)+"/"+nomFichier); 
+    }/*else{
+      std::cout << "Pas de doublon" << std::endl;
+      }*/
+  }
+  
     
   return 0;
 }

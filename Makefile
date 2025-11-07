@@ -57,7 +57,7 @@ release:
 	$(MAKE) BUILD=release all
 
 run: $(BIN)
-	./$(BIN) $$SSDEVID $$SSDEVPASSD $$SSID $$SSPASSWORD ./
+	./$(BIN) $$SSDEVID $$SSDEVPASSD $$SSID $$SSPASSWORD ./GBA
 
 clean:
 	$(RM) $(OBJ)
