@@ -4,115 +4,21 @@
 #include <string>
 #include <vector>
 #include <iomanip>
-#include <cstring>
+//#include <cstring>
 #include <unordered_map>
 #include <algorithm>
 
 #include <curl/curl.h>
-#include <openssl/evp.h>
-#include <zlib.h>
 
 #include <tinyxml2.h>
 
 #include <filesystem>
 
+#include "Rom.h"
+#include "JeuScrape.h"
+#include "ScreenScraper.h"
 
 
-
-
-
-// callback libcurl pour écrire la réponse dans une string
-static size_t write_to_string(void* contents, size_t size, size_t nmemb, void* userp) {
-  size_t real_size = size * nmemb;
-  std::string* mem = static_cast<std::string*>(userp);
-  mem->append(static_cast<char*>(contents), real_size);
-  return real_size;
-}
-
-std::string md5_of_file(const std::string &path) {
-  EVP_MD_CTX *ctx = EVP_MD_CTX_new();
-  const EVP_MD *md = EVP_md5();
-
-  EVP_DigestInit_ex(ctx, md, nullptr);
-
-  std::ifstream f(path, std::ios::binary);
-  std::vector<unsigned char> buffer(4096);
-
-  while (f.good()) {
-    f.read((char*)buffer.data(), buffer.size());
-    EVP_DigestUpdate(ctx, buffer.data(), f.gcount());
-  }
-
-  unsigned char digest[EVP_MAX_MD_SIZE];
-  unsigned int digest_len = 0;
-
-  EVP_DigestFinal_ex(ctx, digest, &digest_len);
-  EVP_MD_CTX_free(ctx);
-
-  // convert to hex string
-  static const char hex[] = "0123456789abcdef";
-  std::string out;
-  out.reserve(digest_len * 2);
-  for (unsigned int i = 0; i < digest_len; ++i) {
-    out.push_back(hex[digest[i] >> 4]);
-    out.push_back(hex[digest[i] & 0xF]);
-  }
-  return out;
-}
-
-
-// calculer CRC32 d'un fichier -> renvoie hex string (sans 0x)
-std::string crc32_of_file(const std::string& path) {
-  unsigned char buffer[8192];
-  uLong crc = crc32(0L, Z_NULL, 0);
-
-  std::ifstream ifs(path, std::ios::binary);
-  if (!ifs) {
-    throw std::runtime_error("Impossible d'ouvrir le fichier pour CRC32: " + path);
-  }
-
-  while (ifs) {
-    ifs.read(reinterpret_cast<char*>(buffer), sizeof(buffer));
-    std::streamsize s = ifs.gcount();
-    if (s > 0) crc = crc32(crc, buffer, static_cast<uInt>(s));
-  }
-
-  std::ostringstream oss;
-  oss << std::hex << std::setw(8) << std::setfill('0') << (unsigned)(crc & 0xFFFFFFFFu);
-  return oss.str();
-}
-
-void sort_file(std::string input, std::string output) {
-  std::ifstream infile(input);
-  if (!infile) {
-    std::cerr << "Erreur : impossible d'ouvrir le fichier " << input << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  std::vector<std::string> lines;
-  std::string line;
-
-  // Lire les lignes du fichier
-  while (std::getline(infile, line)) {
-    lines.push_back(line);
-  }
-  infile.close();
-
-  // Trier les lignes par ordre alphabétique
-  std::sort(lines.begin(), lines.end());
-
-  // Écrire dans un fichier de sortie
-  std::ofstream outfile(output);
-  if (!outfile) {
-    std::cerr << "Erreur : impossible d'ouvrir le fichier " << output << std::endl;
-    exit(EXIT_FAILURE);
-  }
-
-  for (const auto& l : lines) {
-    outfile << l << "\n";
-  }
-  outfile.close();
-}
 
 std::vector<std::pair<int, int>> group(std::string gamelist) {
   std::ifstream infile(gamelist);
@@ -159,55 +65,50 @@ int getNbOccurrences(const std::vector<std::pair<int, int>>& tableau, int valeur
 }
 
 
-
 int main(int argc, char* argv[]) {
-  if (argc < 6) {
+  if (argc < 2) {
     std::cerr << "Usage:\n"
-	      << "  "
-	      << argv[0]
-	      << " <devid> <devpassword> <ssid> <sspassword> <répertoire>\n\n";
-    return 1;
+	      << "  " << argv[0] << " <répertoire>\n\n";
+    return EXIT_FAILURE;
   }
 
-  namespace fs = std::filesystem;
+  std::string dir = argv[1];
 
-  std::string devid = argv[1];
-  std::string devpassword = argv[2];
-  std::string ssid = argv[3];
-  std::string sspassword = argv[4];
+  std::string fichier_gamelist = dir+"/gamelist.dat";
 
-  std::string dir = argv[5];
+  if (std::filesystem::exists(fichier_gamelist)) {
+    std::cerr << "Le fichier gamelist.dat existe déjà" << std::endl;
+    return EXIT_FAILURE;
+  }
 
-  std::ofstream gamelist("gamelist.dat", std::ios::trunc); // ouvre le fichier en mode ajout
+  std::ofstream gamelist(fichier_gamelist, std::ios::trunc); // ouvre le fichier en mode ajout
   if (!gamelist) {
     std::cerr << "Impossible d'ouvrir gamelist.dat pour écriture" << std::endl;
-    return 1;
+    return EXIT_FAILURE;
   }
 
-  int nbFichiers = 0;
-  for (const auto& entry : fs::directory_iterator(dir)) {
+  // Récupération du nombre de fichiers à traiter
+  int nb_fichiers = 0;
+  for (const auto& entry : std::filesystem::directory_iterator(dir)) {
     if (entry.is_regular_file() && (entry.path().extension() == ".gba" || entry.path().extension() == ".zip")){
-      nbFichiers++;
+      nb_fichiers++;
     }
   }
 
-  double nbFichiersParcourus = 0;
-  for (const auto& entry : fs::directory_iterator(dir)) {
+  double nb_fichiers_parcourus = 0;
+  for (const auto& entry : std::filesystem::directory_iterator(dir)) {
     if (entry.is_regular_file() && (entry.path().extension() == ".gba" || entry.path().extension() == ".zip")){
-      //std::cout << "Fichier trouvé : " << entry.path().filename() << std::endl;
-      //std::cout << std::string(20, '\b');
-      std::cout << std::string(20, ' ');
-      std::cout << std::string(20, '\b');
-      std::cout << ((nbFichiersParcourus/nbFichiers)*100) << "% " << std::flush;
-      nbFichiersParcourus++;
+      std::cout << std::string(20, '\b') << std::string(20, ' ') << std::string(20, '\b');
+      std::cout << ((nb_fichiers_parcourus/nb_fichiers)*100) << "% " << std::flush;
+      nb_fichiers_parcourus++;
 
     
-      std::string file = dir+std::string("/")+entry.path().filename().string();
-      std::string crchex = crc32_of_file(file);
-      std::string md5hex = md5_of_file(file);
+      std::string chemin_rom = dir+std::string("/")+entry.path().filename().string();
+      Rom rom(chemin_rom);
+      std::string crchex = rom.getCRC();
+      std::string md5hex = rom.getMD5();
 
-      std::cout << file << std::endl;
-
+      /*
       // Construire l'URL avec encodage des paramètres via curl_easy_escape
       CURL* curl = curl_easy_init();
       if (!curl) {
@@ -267,9 +168,16 @@ int main(int argc, char* argv[]) {
       if (enc_sspassword) curl_free(enc_sspassword);
       if (enc_md5) curl_free(enc_md5);
       if (enc_crc) curl_free(enc_crc);
-      curl_easy_cleanup(curl);
+      curl_easy_cleanup(curl);*/
 
-      if(http_code == 200){
+      JeuScrape *jeu = ScreenScraper::recherche_jeu_par_CRC(crchex);
+
+      if(jeu!=NULL){
+	gamelist << jeu->getNumeroDeJeu() << " " << entry.path().filename().string() << std::endl;
+      }else
+	gamelist << "-1" << " " << entry.path().filename().string() << std::endl;
+      
+      /*if(http_code == 200){
 	tinyxml2::XMLDocument doc;
 	doc.Parse(response.c_str());
 	tinyxml2::XMLElement* data = doc.RootElement();
@@ -279,11 +187,14 @@ int main(int argc, char* argv[]) {
 	gamelist << jeuId << " " << entry.path().filename().string() << std::endl;
       }else
 	gamelist << "-1" << " " << entry.path().filename().string() << std::endl;
+      */
       
     }
     
   }
 
+
+  /*
   std::vector<std::pair<int, int>> tableau = group("gamelist.dat");
 
   std::ifstream infile("gamelist.dat");
@@ -314,14 +225,12 @@ int main(int argc, char* argv[]) {
       std::filesystem::path repPath(dir+"/"+std::to_string(numero));
       if (!std::filesystem::exists(repPath))
 	std::filesystem::create_directories(repPath);
-      fs::rename(dir+"/"+nomFichier, dir+"/"+std::to_string(numero)+"/"+nomFichier); 
-    }/*else{
-      std::cout << "Pas de doublon" << std::endl;
-      }*/
+      std::filesystem::rename(dir+"/"+nomFichier, dir+"/"+std::to_string(numero)+"/"+nomFichier); 
+    }
   }
 
   std::cout << std::endl;
-  
+  */
     
   return 0;
 }

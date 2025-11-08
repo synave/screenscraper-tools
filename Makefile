@@ -23,7 +23,7 @@ OBJ := $(patsubst %.cpp,%.o,$(SRC))
 BUILD ?= debug
 
 # Flags par défaut
-CXXFLAGS := -std=$(STD) -Wall -Wextra
+CXXFLAGS := -std=$(STD) -Wall -Wextra -DSSDEVID="\"$(SSDEVID)\"" -DSSDEVPASSWD="\"$(SSDEVPASSWD)\"" -DSSDEVPASSWDDEBUG="\"$(SSDEVPASSWDDEBUG)\"" -DSSID="\"$(SSID)\"" -DSSPASSWD="\"$(SSPASSWD)\""
 LDFLAGS  := 
 LDLIBS   := -lcurl -lcrypto -lz -ltinyxml2
 
@@ -57,7 +57,7 @@ release:
 	$(MAKE) BUILD=release all
 
 run: $(BIN)
-	./$(BIN) $$SSDEVID $$SSDEVPASSD $$SSID $$SSPASSWORD ./GBA
+	./$(BIN) $$SSDEVID $$SSDEVPASSWD $$SSID $$SSPASSWD ./GBA
 
 clean:
 	$(RM) $(OBJ)
