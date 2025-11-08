@@ -184,14 +184,29 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
+  int nbFichiers = 0;
+  for (const auto& entry : fs::directory_iterator(dir)) {
+    if (entry.is_regular_file() && (entry.path().extension() == ".gba" || entry.path().extension() == ".zip")){
+      nbFichiers++;
+    }
+  }
+
+  double nbFichiersParcourus = 0;
   for (const auto& entry : fs::directory_iterator(dir)) {
     if (entry.is_regular_file() && (entry.path().extension() == ".gba" || entry.path().extension() == ".zip")){
       //std::cout << "Fichier trouvé : " << entry.path().filename() << std::endl;
+      //std::cout << std::string(20, '\b');
+      std::cout << std::string(20, ' ');
+      std::cout << std::string(20, '\b');
+      std::cout << ((nbFichiersParcourus/nbFichiers)*100) << "% " << std::flush;
+      nbFichiersParcourus++;
 
     
       std::string file = dir+std::string("/")+entry.path().filename().string();
       std::string crchex = crc32_of_file(file);
       std::string md5hex = md5_of_file(file);
+
+      std::cout << file << std::endl;
 
       // Construire l'URL avec encodage des paramètres via curl_easy_escape
       CURL* curl = curl_easy_init();
@@ -304,6 +319,8 @@ int main(int argc, char* argv[]) {
       std::cout << "Pas de doublon" << std::endl;
       }*/
   }
+
+  std::cout << std::endl;
   
     
   return 0;
