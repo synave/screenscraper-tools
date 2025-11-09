@@ -74,13 +74,22 @@ int main(int argc, char* argv[]) {
   }
 
   std::string dir = argv[1];
-  std::string fichier_gamelist = dir+"/gamelist.dat";
+  std::string dir_scrap = dir+"/scrap";
+  std::string dir_imgs = dir+"/Imgs";
+  std::string fichier_gamelist = dir_scrap+"/gamelist.dat";
   Temps debut, inter, diff, eta;
 
-  if (std::filesystem::exists(fichier_gamelist)) {
-    std::cerr << "Le fichier gamelist.dat existe déjà" << std::endl;
+  if (std::filesystem::exists(dir_scrap) && std::filesystem::is_directory(dir_scrap)) {
+    std::cerr << "Le répertoire scrap existe déjà" << std::endl;
     return EXIT_FAILURE;
-  }
+  }else
+    std::filesystem::create_directory(dir_scrap);
+
+  if (std::filesystem::exists(dir_imgs) && std::filesystem::is_directory(dir_imgs)) {
+    std::cerr << "Le répertoire images existe déjà" << std::endl;
+    return EXIT_FAILURE;
+  }else
+    std::filesystem::create_directory(dir_imgs);
 
   std::ofstream gamelist(fichier_gamelist, std::ios::trunc); // ouvre le fichier en mode ajout
   if (!gamelist) {
@@ -121,7 +130,8 @@ int main(int argc, char* argv[]) {
       std::string crchex = rom.getCRC();
 
       JeuScrape *jeu = ScreenScraper::recherche_jeu_par_CRC(crchex);
-      jeu->setChemin(chemin_rom);
+      jeu->sauvegarder(dir_scrap+"/"+entry.path().filename().string()+".xml");
+      jeu->telechargeMiniature(dir_imgs+"/"+entry.path().stem().string()+".png");
 
       if(jeu!=NULL){
 	gamelist << jeu->getNumeroDeJeu() << " " << entry.path().filename().string() << std::endl;
@@ -132,7 +142,7 @@ int main(int argc, char* argv[]) {
     
   }
 
-  std::cout << std::string(20, '\b') << std::string(20, ' ') << std::string(20, '\b') << "100%" << std::endl;
+  std::cout << std::string(40, '\b') << std::string(40, ' ') << std::string(40, '\b') << "100%" << std::endl;
 
 
   /*

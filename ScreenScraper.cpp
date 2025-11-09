@@ -8,6 +8,13 @@ size_t ScreenScraper::write_to_string(void* contents, size_t size, size_t nmemb,
   return real_size;
 }
 
+/* callback d'écriture — écrit les données reçues dans le FILE* passé via userdata */
+size_t ScreenScraper::write_to_file(void *ptr, size_t size, size_t nmemb, void *userdata) {
+  FILE *fp = (FILE *)userdata;
+  size_t written = fwrite(ptr, size, nmemb, fp);
+  return written;
+}
+
 JeuScrape* ScreenScraper::recherche_jeu_par_CRC(const std::string& crc){
   // Construire l'URL avec encodage des paramètres via curl_easy_escape
   CURL* curl = curl_easy_init();
@@ -140,4 +147,49 @@ JeuScrape* ScreenScraper::recherche_jeu_par_MD5(const std::string& md5){
   }
   
   return NULL;
+}
+
+void ScreenScraper::telechargeImg(std::string url, std::string outfile) {
+  CURL *curl = curl_easy_init();
+  if (!curl) {
+    std::cerr << "Impossible d'initialiser curl" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  // ouvrir le fichier en mode binaire
+  FILE *fp = fopen(outfile.c_str(), "wb");
+  if (!fp) {
+    std::cerr << "Impossible d'ouvrir le fichier " << url << " en écriture\n";
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    exit(EXIT_FAILURE);
+  }
+  
+  // libcurl options et exécution GET
+  curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_to_file);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+  // Optionnel : timeout etc.
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+  // exécution
+  CURLcode res = curl_easy_perform(curl);
+  if (res != CURLE_OK) {
+    std::cerr << "Erreur curl: " << curl_easy_strerror(res) << std::endl;
+    fclose(fp);
+    curl_easy_cleanup(curl);
+    curl_global_cleanup();
+    exit(EXIT_FAILURE);
+  }
+
+  long http_code = 0;
+  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+  if (http_code != 200L)
+    std::cerr << "HTTP status: "<< http_code << "(attendu 200)" << std::endl;
+   
+
+  fclose(fp);
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
 }

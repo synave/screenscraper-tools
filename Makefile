@@ -1,9 +1,9 @@
-# Makefile pour cherche_doublon.cpp
+# Makefile pour scraper.cpp
 # Utilisation :
 #   make            -> build (mode debug par défaut)
 #   make BUILD=release  -> build en release (optimisé)
 #   make debug/release  -> cible raccourcie
-#   make run        -> exécute ./cherche_doublon
+#   make run        -> exécute ./scraper
 #   make clean      -> supprime .o
 #   make distclean  -> supprime binaire aussi
 
@@ -13,7 +13,7 @@ CXX ?= g++
 STD ?= c++17
 
 # Nom du binaire (modifiez si besoin)
-BIN := cherche_doublon
+BIN := scraper
 
 # Detecte automatiquement tous les .cpp dans le répertoire
 SRC := $(wildcard *.cpp)
