@@ -167,11 +167,14 @@ int main(int argc, char* argv[]) {
       std::string crchex = rom.getCRC();
 
       JeuScrape *jeu = ScreenScraper::recherche_jeu_par_CRC(crchex);
-      jeu->sauvegarder(dir_scrap+"/"+entry.path().filename().string()+".xml");
-      jeu->telechargeMiniature(dir_imgs+"/"+entry.path().stem().string()+".png");
+      
+      
 
       if(jeu!=NULL){
 	gamelist << jeu->getNumeroDeJeu() << " " << entry.path().filename().string() << std::endl;
+	jeu->sauvegarder(dir_scrap+"/"+entry.path().filename().string()+".xml");
+	jeu->telechargeMiniature(dir_imgs+"/"+entry.path().stem().string()+".png");
+	delete jeu;
       }else
 	gamelist << "-1" << " " << entry.path().filename().string() << std::endl;
            

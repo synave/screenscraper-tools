@@ -72,7 +72,7 @@ JeuScrape* ScreenScraper::recherche_jeu_par_CRC(const std::string& crc){
   if (enc_sspassword) curl_free(enc_sspassword);
   if (enc_crc) curl_free(enc_crc);
   curl_easy_cleanup(curl);
-
+  
   if(http_code == 200){
     JeuScrape *retour = new JeuScrape();
     retour->Parse(response.c_str());
