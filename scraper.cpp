@@ -19,6 +19,41 @@
 #include "ScreenScraper.h"
 #include "Temps.h"
 
+void sort_file(std::string input, std::string output) {
+  std::ifstream infile(input);
+
+  if (!infile) {
+    std::cerr << "Erreur : impossible d'ouvrir le fichier " << input << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  std::vector<std::string> lines;
+  std::string line;
+
+  // Lire les lignes du fichier
+  while (std::getline(infile, line)) {
+    lines.push_back(line);
+  }
+  infile.close();
+
+  // Trier les lignes par ordre alphabétique
+  std::sort(lines.begin(), lines.end());
+
+  // Écrire dans un fichier de sortie
+  std::ofstream outfile(output);
+
+  if (!outfile) {
+    std::cerr << "Erreur : impossible d'ouvrir le fichier " << output << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  for (const auto& l : lines) {
+    outfile << l << "\n";
+  }
+  outfile.close();
+}
+
+
 
 
 std::vector<std::pair<int, int>> group(std::string gamelist) {
@@ -77,6 +112,8 @@ int main(int argc, char* argv[]) {
   std::string dir_scrap = dir+"/scrap";
   std::string dir_imgs = dir+"/Imgs";
   std::string fichier_gamelist = dir_scrap+"/gamelist.dat";
+  std::string fichier_gamelistsorted = dir_scrap+"/gamelist_sorted.dat";
+  std::string fichier_doublon = dir_scrap+"/doublon.dat";
   Temps debut, inter, diff, eta;
 
   if (std::filesystem::exists(dir_scrap) && std::filesystem::is_directory(dir_scrap)) {
@@ -112,10 +149,10 @@ int main(int argc, char* argv[]) {
     if (entry.is_regular_file() && entry.path().extension() == ".gba"){
       std::cout << std::string(40, '\b') << std::string(40, ' ') << std::string(40, '\b');
       std::cout << std::fixed
-              << std::setprecision(3)
-              << std::setw(6)
-              << std::setfill('0')
-	      << ((nb_fichiers_parcourus/nb_fichiers)*100) << " % " << std::flush;
+		<< std::setprecision(3)
+		<< std::setw(6)
+		<< std::setfill('0')
+		<< ((nb_fichiers_parcourus/nb_fichiers)*100) << " % " << std::flush;
       if(nb_fichiers_parcourus > 0){
 	inter = Temps::clic();
 	diff=inter-debut;
@@ -145,16 +182,14 @@ int main(int argc, char* argv[]) {
   std::cout << std::string(40, '\b') << std::string(40, ' ') << std::string(40, '\b') << "100%" << std::endl;
 
 
-  /*
-  std::vector<std::pair<int, int>> tableau = group("gamelist.dat");
 
-  std::ifstream infile("gamelist.dat");
-  if (!infile) {
-    std::cerr << "Erreur : impossible d'ouvrir input.txt\n";
-    exit(EXIT_FAILURE);
-  }
-
+  sort_file(fichier_gamelist, fichier_gamelistsorted);
+  std::vector<std::pair<int, int>> tableau = group(fichier_gamelistsorted);  
+  std::ifstream infile(fichier_gamelistsorted);
+  
   std::string ligne;
+
+  std::ofstream doublon(fichier_doublon, std::ios::trunc);
 
   while (std::getline(infile, ligne)) {
     std::stringstream ss(ligne);
@@ -168,20 +203,11 @@ int main(int argc, char* argv[]) {
 
     if (!nomFichier.empty() && nomFichier[0] == ' ')
       nomFichier.erase(0, 1);
-
-    // std::cout << numero << " - " << nomFichier << std::endl;
-
-    if(getNbOccurrences(tableau, numero) > 1 || numero < 0){
-      //std::cout << "Doublon pour " << nomFichier << std::endl;
-      std::filesystem::path repPath(dir+"/"+std::to_string(numero));
-      if (!std::filesystem::exists(repPath))
-	std::filesystem::create_directories(repPath);
-      std::filesystem::rename(dir+"/"+nomFichier, dir+"/"+std::to_string(numero)+"/"+nomFichier); 
+    
+    if(getNbOccurrences(tableau, numero) > 1){
+      doublon << numero << " - " << nomFichier << std::endl;
     }
   }
 
-  std::cout << std::endl;
-  */
-    
   return 0;
 }
