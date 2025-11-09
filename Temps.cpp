@@ -2,10 +2,27 @@
 #include <chrono>
 #include <iomanip>
 
+// Constructeur par défaut
+Temps::Temps()
+    : heures(0), minutes(0), secondes(0), millisecondes(0) {}
+
 // Constructeur
 Temps::Temps(long long h, long long m, long long s, long long ms)
     : heures(h), minutes(m), secondes(s), millisecondes(ms) {}
 
+// Constructeur à partir d'un temps en millisecondes
+Temps::Temps(long long totalMs) {
+    heures        = totalMs / 3600000LL;
+    totalMs      %= 3600000LL;
+
+    minutes       = totalMs / 60000LL;
+    totalMs      %= 60000LL;
+
+    secondes      = totalMs / 1000LL;
+    totalMs      %= 1000LL;
+
+    millisecondes = totalMs;
+}
 
 // Méthode statique : récupère l'heure système et retourne un Temps
 Temps Temps::clic() {
@@ -46,6 +63,22 @@ Temps Temps::operator-(const Temps& other) const {
     long long ms = diff;
 
     return Temps(h, m, s, ms);
+}
+
+// Multiplication d'un temps par un réel
+Temps Temps::operator*(double facteur) const {
+    // Convertit le temps courant en millisecondes
+    long long totalMs =
+        heures * 3600000LL +
+        minutes * 60000LL +
+        secondes * 1000LL +
+        millisecondes;
+
+    // Multiplie par un réel
+    long long resultMs = static_cast<long long>(totalMs * facteur);
+
+    // Retourne un nouvel objet Temps grâce au constructeur totalMs
+    return Temps(resultMs);
 }
 
 
