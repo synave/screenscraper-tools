@@ -2,7 +2,7 @@
 outils en ligne de commande pour gérer sa collection de jeux
 
 # Bibliothèques requises
-sudo apt install build-essential libtinyxml2-dev
+sudo apt install build-essential libtinyxml2-dev libcurl4-openssl-dev
 
 # Identifiants développeur screenscraper
 Pour pouvoir compiler ce programme, vous aurez besoin d'identifiants développeurs sur le site screenscraper.
