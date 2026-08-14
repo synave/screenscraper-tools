@@ -100,6 +100,15 @@ int getNbOccurrences(const std::vector<std::pair<int, int>>& tableau, int valeur
   return 0;  // valeur non trouvée
 }
 
+bool extension_connue(const std::string &ext){
+  std::vector<std::string> extensions_connues = {
+    ".zip", ".gb", ".gba", ".gbc", ".cue", ".sfc", ".md", ".nes"
+  };
+  return std::find(extensions_connues.begin(),
+		   extensions_connues.end(),
+		   ext) != extensions_connues.end();
+}
+
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
@@ -107,6 +116,8 @@ int main(int argc, char* argv[]) {
 	      << "  " << argv[0] << " <répertoire>\n\n";
     return EXIT_FAILURE;
   }
+
+  
 
   std::string dir = argv[1];
   std::string dir_scrap = dir+"/scrap";
@@ -137,7 +148,7 @@ int main(int argc, char* argv[]) {
   // Récupération du nombre de fichiers à traiter
   int nb_fichiers = 0;
   for (const auto& entry : std::filesystem::directory_iterator(dir)) {
-    if (entry.is_regular_file() && (entry.path().extension() == ".gba" || entry.path().extension() == ".zip")){
+    if (entry.is_regular_file() && (extension_connue(entry.path().extension()))){
       nb_fichiers++;
     }
   }
@@ -146,7 +157,7 @@ int main(int argc, char* argv[]) {
   
   double nb_fichiers_parcourus = 0;
   for (const auto& entry : std::filesystem::directory_iterator(dir)) {
-    if (entry.is_regular_file() && entry.path().extension() == ".gba"){
+    if (entry.is_regular_file() && extension_connue(entry.path().extension())){
       std::cout << std::string(40, '\b') << std::string(40, ' ') << std::string(40, '\b');
       std::cout << std::fixed
 		<< std::setprecision(3)

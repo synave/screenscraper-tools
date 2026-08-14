@@ -48,5 +48,7 @@ std::string Cryptage::crc(const std::string &path){
 
   std::ostringstream oss;
   oss << std::hex << std::setw(8) << std::setfill('0') << (unsigned)(crc & 0xFFFFFFFFu);
-  return oss.str();
+  std::string ret = oss.str();
+  std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
+  return ret;
 }

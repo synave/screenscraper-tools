@@ -1,12 +1,13 @@
 #ifndef CRYPTAGE_H
 #define CRYPTAGE_H
 
-#include <string>
+#include <cstring>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 #include <openssl/evp.h>
 #include <zlib.h>

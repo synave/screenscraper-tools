@@ -13,11 +13,14 @@ CXX ?= g++
 STD ?= c++17
 
 # Nom du binaire (modifiez si besoin)
-BIN := scraper
+BIN := scraper crc
 
 # Detecte automatiquement tous les .cpp dans le répertoire
-SRC := $(wildcard *.cpp)
-OBJ := $(patsubst %.cpp,%.o,$(SRC))
+# SRC := $(wildcard *.cpp)
+SRC-SCRAPER := $(filter-out crc.cpp,$(wildcard *.cpp))
+SRC-CRC := $(filter-out scraper.cpp,$(wildcard *.cpp))
+OBJ-SCRAPER := $(patsubst %.cpp,%.o,$(SRC-SCRAPER))
+OBJ-CRC := $(patsubst %.cpp,%.o,$(SRC-CRC))
 
 # Build mode (debug par défaut)
 BUILD ?= debug
@@ -42,7 +45,13 @@ endif
 all: $(BIN)
 
 # Link
-$(BIN): $(OBJ)
+# $(BIN): $(OBJ)
+# 	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+scraper: $(OBJ-SCRAPER)
+	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+crc: $(OBJ-CRC)
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 # Compile
@@ -60,7 +69,7 @@ run: $(BIN)
 	./$(BIN) $$SSDEVID $$SSDEVPASSWD $$SSID $$SSPASSWD ./GBA
 
 clean:
-	$(RM) $(OBJ)
+	$(RM) $(OBJ-SCRAPER) $(OBJ-CRC) *~
 
 distclean: clean
 	$(RM) $(BIN)
@@ -70,6 +79,8 @@ info:
 	@echo "CXXFLAGS = $(CXXFLAGS)"
 	@echo "LDFLAGS  = $(LDFLAGS)"
 	@echo "LDLIBS   = $(LDLIBS)"
-	@echo "SRC      = $(SRC)"
-	@echo "OBJ      = $(OBJ)"
+	@echo "SRC-SCRAPER      = $(SRC-SCRAPER)"
+	@echo "SRC-CRC      = $(SRC-CRC)"
+	@echo "OBJ-SCRAPER      = $(OBJ-SCRAPER)"
+	@echo "OBJ-CRC      = $(OBJ-CRC)"
 	@echo "BIN      = $(BIN)"
