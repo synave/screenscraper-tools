@@ -20,7 +20,7 @@ SRC := md5.cpp ../src/Rom.cpp ../src/Cryptage.cpp
 OBJ := $(patsubst %.cpp,%.o,$(SRC))
 
 # Build mode (debug par défaut)
-BUILD ?= debug
+BUILD ?= release
 
 # Flags par défaut
 CXXFLAGS := -std=$(STD) -Wall -Wextra -I../include

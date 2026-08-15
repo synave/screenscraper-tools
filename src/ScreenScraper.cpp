@@ -39,6 +39,10 @@ JeuScrape* ScreenScraper::recherche_jeu_par_CRC(const std::string& crc){
       << "&crc=" << enc_crc;
 
   std::string full_url = url.str();
+
+  #ifdef DEBUG
+  std::cerr << "INFO : " << full_url << std::endl;
+  #endif
    
   // libcurl options et exécution GET
   std::string response;
