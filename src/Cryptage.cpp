@@ -28,7 +28,10 @@ std::string Cryptage::md5(const std::string &path){
     out.push_back(hex[digest[i] >> 4]);
     out.push_back(hex[digest[i] & 0xF]);
   }
-  return out;
+
+  std::string ret = out;
+  std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
+  return ret;
 }
 
 std::string Cryptage::crc(const std::string &path){
@@ -48,6 +51,7 @@ std::string Cryptage::crc(const std::string &path){
 
   std::ostringstream oss;
   oss << std::hex << std::setw(8) << std::setfill('0') << (unsigned)(crc & 0xFFFFFFFFu);
+  
   std::string ret = oss.str();
   std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
   return ret;

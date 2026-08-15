@@ -13,10 +13,10 @@ CXX ?= g++
 STD ?= c++17
 
 # Nom du binaire (modifiez si besoin)
-BIN := crc
+BIN := md5
 
 # Detecte automatiquement tous les .cpp dans le répertoire
-SRC := crc.cpp ../src/Rom.cpp ../src/Cryptage.cpp
+SRC := md5.cpp ../src/Rom.cpp ../src/Cryptage.cpp
 OBJ := $(patsubst %.cpp,%.o,$(SRC))
 
 # Build mode (debug par défaut)
