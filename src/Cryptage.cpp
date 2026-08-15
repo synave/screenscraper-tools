@@ -56,3 +56,39 @@ std::string Cryptage::crc(const std::string &path){
   std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
   return ret;
 }
+
+
+std::string Cryptage::sha1(const std::string &path){
+  EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+  const EVP_MD *md = EVP_sha1();
+
+  EVP_DigestInit_ex(ctx, md, nullptr);
+
+  std::ifstream f(path, std::ios::binary);
+  std::vector<unsigned char> buffer(4096);
+
+  while (f.good()) {
+    f.read((char*)buffer.data(), buffer.size());
+    EVP_DigestUpdate(ctx, buffer.data(), f.gcount());
+  }
+
+  unsigned char digest[EVP_MAX_MD_SIZE];
+  unsigned int digest_len = 0;
+
+  EVP_DigestFinal_ex(ctx, digest, &digest_len);
+  EVP_MD_CTX_free(ctx);
+
+  // convert to hex string
+  static const char hex[] = "0123456789abcdef";
+  std::string out;
+  out.reserve(digest_len * 2);
+
+  for (unsigned int i = 0; i < digest_len; ++i) {
+    out.push_back(hex[digest[i] >> 4]);
+    out.push_back(hex[digest[i] & 0xF]);
+  }
+
+  std::string ret = out;
+  std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
+  return ret;
+}
