@@ -2,6 +2,7 @@
 #define SCREENSCRAPER_H
 
 #include <iostream>
+#include <cstdlib>
 #include <sstream>
 #include <string>
 #include <curl/curl.h>
@@ -10,11 +11,11 @@
 class JeuScrape;
 class ScreenScraper {
  private :
-  inline static std::string devid = SSDEVID;
-  inline static std::string devpassword = SSDEVPASSWD;
-  inline static std::string devpasswd_debug = SSDEVPASSWDDEBUG;
-  inline static std::string ssid = SSID;
-  inline static std::string sspassword = SSPASSWD;
+  inline static std::string devid = std::getenv("SSDEVID");
+  inline static std::string devpassword = std::getenv("SSDEVPASSWD");
+  inline static std::string devpasswd_debug = std::getenv("SSDEVPASSWDDEBUG");
+  inline static std::string ssid = std::getenv("SSID");
+  inline static std::string sspassword = std::getenv("SSPASSWD");
 
   static size_t write_to_string(void* contents, size_t size, size_t nmemb, void* userp);
   static size_t write_to_file(void *ptr, size_t size, size_t nmemb, void *userdata);

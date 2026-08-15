@@ -1,18 +1,4 @@
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <vector>
-#include <iomanip>
-//#include <cstring>
-#include <unordered_map>
-#include <algorithm>
-
-#include <curl/curl.h>
-
-#include <tinyxml2.h>
-
-#include <filesystem>
 
 #include "Rom.h"
 
