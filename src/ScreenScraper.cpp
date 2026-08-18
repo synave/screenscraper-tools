@@ -1,5 +1,17 @@
 #include "ScreenScraper.h"
 
+ScreenScraper::ScreenScraper(const std::string& devid,
+	       const std::string& devpassword,
+	       const std::string& devpassword_debug = "",
+	       const std::string& ssid = "",
+	       const std::string& sspassword = ""){
+    ScreenScraper::devid = devid;
+    ScreenScraper::devpassword = devpassword;
+    ScreenScraper::devpassword_debug = devpassword_debug;
+    ScreenScraper::ssid = ssid;
+    ScreenScraper::sspassword = sspassword;
+}
+
 // callback libcurl pour écrire la réponse dans une string
 size_t ScreenScraper::write_to_string(void* contents, size_t size, size_t nmemb, void* userp) {
   size_t real_size = size * nmemb;

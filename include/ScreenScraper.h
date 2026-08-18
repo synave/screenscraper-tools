@@ -28,15 +28,9 @@ public :
   
   ScreenScraper(const std::string& devid,
 	       const std::string& devpassword,
-	       const std::string& devpassword_debug = "",
-	       const std::string& ssid = "",
-	       const std::string& sspassword = ""){
-    ScreenScraper::devid = devid;
-    ScreenScraper::devpassword = devpassword;
-    ScreenScraper::devpassword_debug = devpassword_debug;
-    ScreenScraper::ssid = ssid;
-    ScreenScraper::sspassword = sspassword;
-  };
+	       const std::string& devpassword_debug,
+	       const std::string& ssid,
+	       const std::string& sspassword);
   
   JeuScrape* recherche_jeu_par_CRC(const std::string& crc);
   JeuScrape* recherche_jeu_par_MD5(const std::string& md5);
