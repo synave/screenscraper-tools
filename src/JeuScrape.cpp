@@ -52,8 +52,10 @@ void JeuScrape::sauvegarder(std::string chemin){
 }
 
 void JeuScrape::telechargeMiniature(std::string chemin){
-  /*std::cout << urlMiniature() << std::endl;
-    std::cout << chemin << std::endl;*/
+  #ifdef DEBUG
+  std::cerr << urlMiniature() << std::endl;
+  std::cerr << chemin << std::endl;
+  #endif
   std::string url = urlMiniature();
   if(url!= "")
     ScreenScraper::telechargeImg(url, chemin);

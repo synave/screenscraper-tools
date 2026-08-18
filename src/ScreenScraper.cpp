@@ -23,10 +23,10 @@ JeuScrape* ScreenScraper::recherche_jeu_par_CRC(const std::string& crc){
     exit(EXIT_FAILURE);
   }
 
-  char* enc_devid = curl_easy_escape(curl, ConfigSS::devid.c_str(), 0);
-  char* enc_devpassword = curl_easy_escape(curl, ConfigSS::devpassword.c_str(), 0);
-  char* enc_ssid = curl_easy_escape(curl, ConfigSS::ssid.c_str(), 0);
-  char* enc_sspassword = curl_easy_escape(curl, ConfigSS::sspassword.c_str(), 0);
+  char* enc_devid = curl_easy_escape(curl, ScreenScraper::devid.c_str(), 0);
+  char* enc_devpassword = curl_easy_escape(curl, ScreenScraper::devpassword.c_str(), 0);
+  char* enc_ssid = curl_easy_escape(curl, ScreenScraper::ssid.c_str(), 0);
+  char* enc_sspassword = curl_easy_escape(curl, ScreenScraper::sspassword.c_str(), 0);
   char* enc_crc = curl_easy_escape(curl, crc.c_str(), 0);
 
   std::ostringstream url;
@@ -94,10 +94,10 @@ JeuScrape* ScreenScraper::recherche_jeu_par_MD5(const std::string& md5){
     exit(EXIT_FAILURE);
   }
 
-  char* enc_devid = curl_easy_escape(curl, ConfigSS::devid.c_str(), 0);
-  char* enc_devpassword = curl_easy_escape(curl, ConfigSS::devpassword.c_str(), 0);
-  char* enc_ssid = curl_easy_escape(curl, ConfigSS::ssid.c_str(), 0);
-  char* enc_sspassword = curl_easy_escape(curl, ConfigSS::sspassword.c_str(), 0);
+  char* enc_devid = curl_easy_escape(curl, ScreenScraper::devid.c_str(), 0);
+  char* enc_devpassword = curl_easy_escape(curl, ScreenScraper::devpassword.c_str(), 0);
+  char* enc_ssid = curl_easy_escape(curl, ScreenScraper::ssid.c_str(), 0);
+  char* enc_sspassword = curl_easy_escape(curl, ScreenScraper::sspassword.c_str(), 0);
   char* enc_md5 = curl_easy_escape(curl, md5.c_str(), 0);
 
   std::ostringstream url;
