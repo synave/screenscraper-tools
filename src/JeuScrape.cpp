@@ -47,7 +47,7 @@ std::string JeuScrape::getNumeroDeJeu(){
   return jeu->Attribute("id");
 }
 
-void JeuScrape::sauvegarder(std::string chemin){
+/*void JeuScrape::sauvegarder(std::string chemin){
   this->SaveFile(chemin.c_str());
 }
 
@@ -59,4 +59,4 @@ void JeuScrape::telechargeMiniature(std::string chemin){
   std::string url = urlMiniature();
   if(url!= "")
     ScreenScraper::telechargeImg(url, chemin);
-}
+    }*/

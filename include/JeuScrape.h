@@ -16,8 +16,8 @@ private:
   
  public:
   std::string getNumeroDeJeu();
-  void sauvegarder(std::string chemin);
-  void telechargeMiniature(std::string chemin);
+  /*void sauvegarder(std::string chemin);
+    void telechargeMiniature(std::string chemin);*/
 };
 
 #endif
