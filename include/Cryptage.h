@@ -15,7 +15,7 @@
 class Cryptage {
  public:
   static std::string md5(const std::string &path);
-  static std::string crc(const std::string &path);
+  static const std::string crc (const std::string &path);
   static std::string sha1(const std::string &path);
 };
 

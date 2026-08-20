@@ -20,9 +20,9 @@ else
     CXXFLAGS += -g -O0 -DDEBUG
 endif
 
-.PHONY: all lib crc md5 sha1 scraper
+.PHONY: all lib crc md5 sha1 scraper tests
 
-all: lib crc md5 sha1 scraper
+all: lib crc md5 sha1 scraper tests
 
 lib : $(OBJ)
 
@@ -31,8 +31,19 @@ lib : $(OBJ)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 crc :
-	cd crc
-	$(MAKE)
+	@(cd crc && $(MAKE))
+
+md5:
+	@(cd md5 && $(MAKE))
+
+sha1:
+	@(cd sha1 && $(MAKE))
+
+scraper:
+	@(cd scraper && $(MAKE))
+
+tests:
+	@(cd tests && $(MAKE))
 
 
 # Targets helpers
@@ -44,3 +55,10 @@ release:
 
 clean:
 	$(RM) $(OBJ) *~
+
+cleanall: clean
+	@(cd crc && $(MAKE) distclean)
+	@(cd md5 && $(MAKE) distclean)
+	@(cd sha1 && $(MAKE) distclean)
+	@(cd scraper && $(MAKE) distclean)
+	@(cd tests && $(MAKE) distclean)

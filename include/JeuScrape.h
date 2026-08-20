@@ -15,7 +15,7 @@ private:
   std::string urlMiniature();
   
  public:
-  std::string getNumeroDeJeu();
+  std::string getNumeroDeJeu() const;
   /*void sauvegarder(std::string chemin);
     void telechargeMiniature(std::string chemin);*/
 };

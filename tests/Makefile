@@ -13,10 +13,10 @@ CXX ?= g++
 STD ?= c++17
 
 # Nom du binaire (modifiez si besoin)
-BIN := main
+BIN := infos_user
 
 # Detecte automatiquement tous les .cpp dans le répertoire
-SRC := $(wildcard ../src/*.cpp) main.cpp
+SRC := $(wildcard ../src/*.cpp) $(BIN).cpp
 OBJ := $(patsubst %.cpp,%.o,$(SRC))
 
 # Build mode (debug par défaut)

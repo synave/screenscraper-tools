@@ -41,8 +41,10 @@ std::string JeuScrape::urlMiniature(){
   return std::string();
 }
 
-std::string JeuScrape::getNumeroDeJeu(){
-  tinyxml2::XMLElement* data = this->RootElement();
+std::string JeuScrape::getNumeroDeJeu() const{
+  tinyxml2::XMLDocument copie;
+  this->DeepCopy(&copie);
+  tinyxml2::XMLElement* data = copie.RootElement();
   tinyxml2::XMLElement* jeu  = data->FirstChildElement("jeu");
   return jeu->Attribute("id");
 }

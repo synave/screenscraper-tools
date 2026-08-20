@@ -31,7 +31,7 @@ ScreenScraper::ScreenScraper(const std::string& devid,
     this->_maxrequestskoperday = std::stoi(user->FirstChildElement("maxrequestskoperday")->GetText());
 }
 
-tinyxml2::XMLDocument* ScreenScraper::requete(const std::string& url){
+tinyxml2::XMLDocument* ScreenScraper::request(const std::string& url) const{
 // Construire l'URL avec encodage des paramètres via curl_easy_escape
   CURL* curl = curl_easy_init();
   if (!curl) {
@@ -104,10 +104,10 @@ tinyxml2::XMLDocument* ScreenScraper::infos_utilisateur(){
   requete += "&ssid="; requete += _ssid;
   requete += "&sspassword="; requete += _sspassword;
 
-  return this->requete(requete);
+  return this->request(requete);
 }
 
-JeuScrape* ScreenScraper::recherche_jeu_par_CRC(const std::string& crc){
+JeuScrape* ScreenScraper::recherche_jeu_par_CRC(const std::string& crc) const{
   std::string requete;
   requete += "https://api.screenscraper.fr/api2/jeuInfos.php";
   requete += "?devid="; requete += _devid;
@@ -117,7 +117,7 @@ JeuScrape* ScreenScraper::recherche_jeu_par_CRC(const std::string& crc){
   requete += "&sspassword="; requete += _sspassword;
   requete += "&crc="; requete += crc;
 
-  tinyxml2::XMLDocument* xml_document = this->requete(requete);
+  tinyxml2::XMLDocument* xml_document = this->request(requete);
   
   if(xml_document == NULL) return NULL;
   

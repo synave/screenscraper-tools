@@ -34,7 +34,7 @@ std::string Cryptage::md5(const std::string &path){
   return ret;
 }
 
-std::string Cryptage::crc(const std::string &path){
+const std::string Cryptage::crc (const std::string &path){
   unsigned char buffer[8192];
   uLong crc = crc32(0L, Z_NULL, 0);
 
