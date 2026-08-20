@@ -49,6 +49,49 @@ std::string JeuScrape::getNumeroDeJeu() const{
   return jeu->Attribute("id");
 }
 
+std::string* JeuScrape::getSynopsis(std::string lg) const{
+  tinyxml2::XMLDocument copie;
+  this->DeepCopy(&copie);
+  tinyxml2::XMLElement* data = copie.RootElement();
+  tinyxml2::XMLElement* jeu  = data->FirstChildElement("jeu");
+  tinyxml2::XMLElement* synopsis  = jeu->FirstChildElement("synopsis");
+  tinyxml2::XMLElement* langue  = synopsis->FirstChildElement("synopsis");
+  #ifdef DEBUG
+  std::cerr << "INFO : synopsis langue : " << langue->Attribute("langue") << std::endl;
+  #endif
+  if(langue==NULL)
+    return NULL;
+  while(lg.compare(std::string(langue->Attribute("langue"))))
+    {
+      langue=langue->NextSiblingElement();
+      if(langue == NULL) return NULL;
+#ifdef DEBUG
+      std::cerr << "INFO : synopsis langue : " << langue->Attribute("langue") << std::endl;
+#endif
+    }
+  
+  return new std::string(langue->GetText());
+}
+
+void JeuScrape::telecharge_miniature(std::string type, std::string region, std::string chemin) const
+{
+  tinyxml2::XMLDocument copie;
+  this->DeepCopy(&copie);
+  tinyxml2::XMLElement* data = copie.RootElement();
+  tinyxml2::XMLElement* jeu  = data->FirstChildElement("jeu");
+  tinyxml2::XMLElement* medias  = jeu->FirstChildElement("medias");
+  tinyxml2::XMLElement* media  = medias->FirstChildElement("media");
+
+  if(media==NULL) return;
+    
+  while(type.compare(std::string(media->Attribute("type"))) || region.compare(std::string(media->Attribute("region"))))
+    {
+      media=media->NextSiblingElement();
+      if(media == NULL) return;
+    }
+  ScreenScraper::telechargeImg(std::string(media->GetText()), chemin);
+}
+
 /*void JeuScrape::sauvegarder(std::string chemin){
   this->SaveFile(chemin.c_str());
 }

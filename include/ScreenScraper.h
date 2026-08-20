@@ -33,6 +33,7 @@ private :
   static size_t write_to_file(void *ptr, size_t size, size_t nmemb, void *userdata);
 
   tinyxml2::XMLDocument* request(const std::string& url) const;
+  tinyxml2::XMLDocument* request(const std::string& base_url, std::vector<std::string> parameter_names, std::vector<std::string> parameter_values) const;
 
 public :
   std::vector<std::string> extensions_connues = {
@@ -60,11 +61,11 @@ public :
   inline const int& maxrequestsperday() const {return _maxrequestsperday;};
   inline const int& maxrequestskoperday() const {return _maxrequestskoperday;};
   
-  JeuScrape* recherche_jeu_par_CRC(const std::string& crc) const;
   tinyxml2::XMLDocument* infos_utilisateur();
-  
-  //JeuScrape* recherche_jeu_par_MD5(const std::string& md5);
-  //void telechargeImg(std::string url, std::string outfile);
+  JeuScrape* recherche_jeu_par_CRC(const std::string& crc) const;
+  JeuScrape* recherche_jeu_par_MD5(const std::string& md5) const;
+  JeuScrape* recherche_jeu_par_SHA1(const std::string& sha1) const;
+  static void telechargeImg(std::string url, std::string outfile);
   
 };
 

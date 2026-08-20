@@ -20,7 +20,11 @@ int main(int argc, char* argv[]) {
   if(trouve==false)
     std::cout << "jeu non trouvé" << std::endl;
   else
-    std::cout << r.jeuScrape()->getNumeroDeJeu() << std::endl;
+    {
+      std::cout << r.jeuScrape()->getNumeroDeJeu() << std::endl;
+      std::cout << *(r.jeuScrape()->getSynopsis("pt")) << std::endl;
+      r.jeuScrape()->telecharge_miniature("mixrbv1","wor","test.png");
+    }
 
   return 0;
 }
