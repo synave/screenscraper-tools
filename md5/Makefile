@@ -16,7 +16,7 @@ STD ?= c++17
 BIN := md5
 
 # Detecte automatiquement tous les .cpp dans le répertoire
-SRC := md5.cpp ../src/Rom.cpp ../src/Cryptage.cpp ../src/ScreenScraper.cpp
+SRC := md5.cpp ../src/Rom.cpp ../src/Cryptage.cpp ../src/ScreenScraper.cpp ../src/Requete.cpp
 OBJ := $(patsubst %.cpp,%.o,$(SRC))
 
 # Build mode (debug par défaut)

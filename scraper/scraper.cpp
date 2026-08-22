@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <iomanip>
-//#include <cstring>
 #include <unordered_map>
 #include <algorithm>
 
@@ -127,6 +126,8 @@ int main(int argc, char* argv[]) {
   std::string fichier_doublon = dir_scrap+"/doublon.dat";
   Temps debut, inter, diff, eta;
 
+  ScreenScraper ss(std::getenv("SSDEVID"), std::getenv("SSDEVPASSWD"), std::getenv("SSDEVPASSWDDEBUG"), std::getenv("SSID"), std::getenv("SSPASSWD"));
+
   if (std::filesystem::exists(dir_scrap) && std::filesystem::is_directory(dir_scrap)) {
     std::cerr << "Le répertoire scrap existe déjà" << std::endl;
     return EXIT_FAILURE;
@@ -175,17 +176,14 @@ int main(int argc, char* argv[]) {
     
       std::string chemin_rom = dir+std::string("/")+entry.path().filename().string();
       Rom rom(chemin_rom);
-      std::string crchex = rom.getCRC();
-
-      JeuScrape *jeu = ScreenScraper::recherche_jeu_par_CRC(crchex);
+      bool trouve = rom.scrape(ss);
       
       
 
-      if(jeu!=NULL){
-	gamelist << jeu->getNumeroDeJeu() << " " << entry.path().filename().string() << std::endl;
-	jeu->sauvegarder(dir_scrap+"/"+entry.path().filename().string()+".xml");
-	jeu->telechargeMiniature(dir_imgs+"/"+entry.path().stem().string()+".png");
-	delete jeu;
+      if(trouve == true){
+	gamelist << rom.jeuScrape()->getNumeroDeJeu() << " " << entry.path().filename().string() << std::endl;
+	//rom.jeuScrape()->sauvegarder(dir_scrap+"/"+entry.path().filename().string()+".xml");
+	rom.jeuScrape()->telecharge_miniature("mixrbv1", "wor", dir_imgs+"/"+entry.path().stem().string()+".png");
       }else
 	gamelist << "-1" << " " << entry.path().filename().string() << std::endl;
            

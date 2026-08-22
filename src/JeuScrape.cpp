@@ -89,19 +89,6 @@ void JeuScrape::telecharge_miniature(std::string type, std::string region, std::
       media=media->NextSiblingElement();
       if(media == NULL) return;
     }
-  ScreenScraper::telechargeImg(std::string(media->GetText()), chemin);
+  Requete::api_to_save_file(std::string(media->GetText()), chemin);
 }
 
-/*void JeuScrape::sauvegarder(std::string chemin){
-  this->SaveFile(chemin.c_str());
-}
-
-void JeuScrape::telechargeMiniature(std::string chemin){
-  #ifdef DEBUG
-  std::cerr << urlMiniature() << std::endl;
-  std::cerr << chemin << std::endl;
-  #endif
-  std::string url = urlMiniature();
-  if(url!= "")
-    ScreenScraper::telechargeImg(url, chemin);
-    }*/

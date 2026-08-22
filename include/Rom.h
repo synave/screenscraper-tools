@@ -6,6 +6,7 @@
 #include "Cryptage.h"
 #include "JeuScrape.h"
 #include "ScreenScraper.h"
+#include "Requete.h"
 
 class Rom {
  private :

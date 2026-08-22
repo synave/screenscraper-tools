@@ -9,6 +9,7 @@
 #include <tinyxml2.h>
 
 #include "JeuScrape.h"
+#include "Requete.h"
 
 class JeuScrape;
 class ScreenScraper {
@@ -28,12 +29,6 @@ private :
   int _maxrequestspermin;
   int _maxrequestsperday;
   int _maxrequestskoperday;
-
-  static size_t write_to_string(void* contents, size_t size, size_t nmemb, void* userp);
-  static size_t write_to_file(void *ptr, size_t size, size_t nmemb, void *userdata);
-
-  tinyxml2::XMLDocument* request(const std::string& url) const;
-  tinyxml2::XMLDocument* request(const std::string& base_url, std::vector<std::string> parameter_names, std::vector<std::string> parameter_values) const;
 
 public :
   std::vector<std::string> extensions_connues = {
@@ -65,7 +60,6 @@ public :
   JeuScrape* recherche_jeu_par_CRC(const std::string& crc) const;
   JeuScrape* recherche_jeu_par_MD5(const std::string& md5) const;
   JeuScrape* recherche_jeu_par_SHA1(const std::string& sha1) const;
-  static void telechargeImg(std::string url, std::string outfile);
   
 };
 

@@ -16,7 +16,7 @@ STD ?= c++17
 BIN := sha1
 
 # Detecte automatiquement tous les .cpp dans le répertoire
-SRC := sha1.cpp ../src/Rom.cpp ../src/Cryptage.cpp ../src/ScreenScraper.cpp
+SRC := sha1.cpp ../src/Rom.cpp ../src/Cryptage.cpp ../src/ScreenScraper.cpp ../src/Requete.cpp
 OBJ := $(patsubst %.cpp,%.o,$(SRC))
 
 # Build mode (debug par défaut)

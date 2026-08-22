@@ -18,8 +18,7 @@ private:
   std::string getNumeroDeJeu() const;
   std::string* getSynopsis(std::string langue) const;
   void telecharge_miniature(std::string type, std::string region, std::string chemin) const;
-  /*void sauvegarder(std::string chemin);
-    void telechargeMiniature(std::string chemin);*/
+
 };
 
 #endif
