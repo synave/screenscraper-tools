@@ -16,7 +16,7 @@ STD ?= c++17
 BIN := crc
 
 # Detecte automatiquement tous les .cpp dans le répertoire
-SRC := crc.cpp ../src/Rom.cpp ../src/Cryptage.cpp
+SRC := crc.cpp ../src/Rom.cpp ../src/Cryptage.cpp ../src/ScreenScraper.cpp
 OBJ := $(patsubst %.cpp,%.o,$(SRC))
 
 # Build mode (debug par défaut)
@@ -52,9 +52,6 @@ debug:
 
 release:
 	$(MAKE) BUILD=release all
-
-run: $(BIN)
-	./$(BIN) $$SSDEVID $$SSDEVPASSWD $$SSID $$SSPASSWD ./GBA
 
 clean:
 	$(RM) $(OBJ) *~
