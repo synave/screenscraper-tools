@@ -1,46 +1,5 @@
 #include "JeuScrape.h"
 
-std::string JeuScrape::urlMiniature(){
-  tinyxml2::XMLElement* data = this->RootElement();
-  tinyxml2::XMLElement* jeu  = data->FirstChildElement("jeu");
-  tinyxml2::XMLElement* medias  = jeu->FirstChildElement("medias");
-  
-  // Ordre de préférence des régions
-  std::vector<std::string> priority = {"fr", "eu", "wor", "us"};
-
-  tinyxml2::XMLElement* bestMedia = nullptr;
-
-  // On va stocker les candidats par région
-  std::map<std::string, tinyxml2::XMLElement*> mediaByRegion;
-
-  for (tinyxml2::XMLElement* m = medias->FirstChildElement("media"); m; m = m->NextSiblingElement("media")) {
-    const char* type   = m->Attribute("type");
-    const char* region = m->Attribute("region");
-
-    if (!type || !region) continue;
-
-    // On ne garde que les media de type "mixrbv1"
-    if (strcmp(type, "mixrbv1") == 0) {
-      mediaByRegion[region] = m;
-    }
-  }
-
-  // Sélection de la meilleure région disponible
-  for (const std::string& r : priority) {
-    if (mediaByRegion.count(r)) {
-      bestMedia = mediaByRegion[r];
-      break;
-    }
-  }
-
-  if (bestMedia) {
-    const char* url = bestMedia->GetText();
-    if (url)
-      return std::string(url);
-  }
-  return std::string();
-}
-
 std::string JeuScrape::getNumeroDeJeu() const{
   tinyxml2::XMLDocument copie;
   this->DeepCopy(&copie);
@@ -73,7 +32,7 @@ std::string* JeuScrape::getSynopsis(std::string lg) const{
   return new std::string(langue->GetText());
 }
 
-void JeuScrape::telecharge_miniature(std::string type, std::string region, std::string chemin) const
+std::optional<std::string> JeuScrape::existe_video(std::string type) const
 {
   tinyxml2::XMLDocument copie;
   this->DeepCopy(&copie);
@@ -82,13 +41,98 @@ void JeuScrape::telecharge_miniature(std::string type, std::string region, std::
   tinyxml2::XMLElement* medias  = jeu->FirstChildElement("medias");
   tinyxml2::XMLElement* media  = medias->FirstChildElement("media");
 
-  if(media==NULL) return;
+  if(media==NULL) return std::nullopt;
+    
+  while(type.compare(std::string(media->Attribute("type"))))
+    {
+      media=media->NextSiblingElement();
+      if(media == NULL) return std::nullopt;
+    }
+  return std::string(media->GetText());
+}
+
+bool JeuScrape::telecharge_video(std::string type, std::string chemin) const
+{ 
+  //auto url = existe_miniature(type, region);
+  std::optional<std::string> url = existe_video(type);
+
+  if(!url.has_value())
+    return false;
+
+  // Ici url n'est pas un pointeur ! *url permet de récupérer la valeur du std::string contenu dans la l'objet url
+  Requete::api_to_save_file(*url, chemin);
+  return true;
+}
+
+std::optional<std::string> JeuScrape::existe_miniature(std::string type, std::string region) const
+{
+  tinyxml2::XMLDocument copie;
+  this->DeepCopy(&copie);
+  tinyxml2::XMLElement* data = copie.RootElement();
+  tinyxml2::XMLElement* jeu  = data->FirstChildElement("jeu");
+  tinyxml2::XMLElement* medias  = jeu->FirstChildElement("medias");
+  tinyxml2::XMLElement* media  = medias->FirstChildElement("media");
+
+  if(media==NULL) return std::nullopt;
     
   while(type.compare(std::string(media->Attribute("type"))) || region.compare(std::string(media->Attribute("region"))))
     {
       media=media->NextSiblingElement();
-      if(media == NULL) return;
+      if(media == NULL) return std::nullopt;
     }
-  Requete::api_to_save_file(std::string(media->GetText()), chemin);
+  return std::string(media->GetText());
 }
 
+bool JeuScrape::telecharge_miniature(std::string type, std::string region, std::string chemin) const
+{ 
+  //auto url = existe_miniature(type, region);
+  std::optional<std::string> url = existe_miniature(type, region);
+
+  if(!url.has_value())
+    return false;
+
+  // Ici url n'est pas un pointeur ! *url permet de récupérer la valeur du std::string contenu dans la l'objet url
+  Requete::api_to_save_file(*url, chemin);
+  return true;
+}
+
+std::optional<std::string> JeuScrape::existe_manuel(std::string region) const
+{
+  tinyxml2::XMLDocument copie;
+  this->DeepCopy(&copie);
+  tinyxml2::XMLElement* data = copie.RootElement();
+  tinyxml2::XMLElement* jeu  = data->FirstChildElement("jeu");
+  tinyxml2::XMLElement* medias  = jeu->FirstChildElement("medias");
+  tinyxml2::XMLElement* media  = medias->FirstChildElement("media");
+
+  if(media==NULL) return std::nullopt;
+
+  std::string type("manuel");
+    
+  while(type.compare(std::string(media->Attribute("type"))) || region.compare(std::string(media->Attribute("region"))))
+    {
+      media=media->NextSiblingElement();
+      if(media == NULL) return std::nullopt;
+    }
+  return std::string(media->GetText());
+}
+
+bool JeuScrape::telecharge_manuel(std::string region, std::string chemin) const
+{ 
+  //auto url = existe_miniature(type, region);
+  std::optional<std::string> url = existe_manuel(region);
+
+  if(!url.has_value())
+    return false;
+
+  // Ici url n'est pas un pointeur ! *url permet de récupérer la valeur du std::string contenu dans la l'objet url
+  Requete::api_to_save_file(*url, chemin);
+  return true;
+}
+
+tinyxml2::XMLError JeuScrape::sauver_fichier_xml(std::string chemin) const
+{
+  tinyxml2::XMLDocument to_save;
+  this->DeepCopy(&to_save);
+  return to_save.SaveFile(chemin.c_str());
+}

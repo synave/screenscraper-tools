@@ -182,8 +182,24 @@ int main(int argc, char* argv[]) {
 
       if(trouve == true){
 	gamelist << rom.jeuScrape()->getNumeroDeJeu() << " " << entry.path().filename().string() << std::endl;
-	//rom.jeuScrape()->sauvegarder(dir_scrap+"/"+entry.path().filename().string()+".xml");
-	rom.jeuScrape()->telecharge_miniature("mixrbv1", "wor", dir_imgs+"/"+entry.path().stem().string()+".png");
+	// Enregistrement du xml du scrap
+	std::string chemin_enr(dir_scrap+"/"+entry.path().filename().string()+".xml");
+	rom.jeuScrape()->sauver_fichier_xml(chemin_enr);
+
+	// Téléchargement de la miniature - fr en premier choix, eu sinon et wor au pire
+	if(!rom.jeuScrape()->telecharge_miniature("mixrbv1", "fr", dir_imgs+"/"+entry.path().stem().string()+".png"))
+	  if(!rom.jeuScrape()->telecharge_miniature("mixrbv1", "eu", dir_imgs+"/"+entry.path().stem().string()+".png"))
+	    rom.jeuScrape()->telecharge_miniature("mixrbv1", "wor", dir_imgs+"/"+entry.path().stem().string()+".png");
+
+	// Téléchargement des vidéos de présentation
+	rom.jeuScrape()->telecharge_video("video", dir_imgs+"/"+entry.path().stem().string()+".mp4");
+	rom.jeuScrape()->telecharge_video("video-normalized", dir_imgs+"/"+entry.path().stem().string()+"-normalized.mp4");
+
+	// Téléchargement du manuel
+	if(!rom.jeuScrape()->telecharge_manuel("fr", dir_imgs+"/"+entry.path().stem().string()+".pdf"))
+	  if(!rom.jeuScrape()->telecharge_manuel("eu", dir_imgs+"/"+entry.path().stem().string()+".pdf"))
+	    rom.jeuScrape()->telecharge_manuel("us", dir_imgs+"/"+entry.path().stem().string()+".pdf");
+	  
       }else
 	gamelist << "-1" << " " << entry.path().filename().string() << std::endl;
            
